@@ -4,3 +4,4 @@ __pycache__/
 output/
 crm_records.json
 .DS_Store
+.claude/
