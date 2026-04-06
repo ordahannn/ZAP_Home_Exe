@@ -102,8 +102,6 @@ python main.py \
 │   └── results_viewer.py        # דף תוצאות HTML (נפתח אוטומטית)
 ├── data/
 │   └── demo_data.py             # נתוני דמו — טכנאי מזגנים ריאליסטי
-├── tools/
-│   └── generate_screenshots.py  # יצירת צילומי מסך לREADME
 └── screenshots/                 # צילומי מסך לתיעוד
 ```
 
