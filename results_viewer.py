@@ -18,7 +18,6 @@ def generate_and_open(client_data: dict, client_card: str, onboarding_script: st
 
 
 def _md_to_html(text: str) -> str:
-    """Minimal markdown → HTML converter."""
     import re
     lines = text.splitlines()
     out = []
@@ -47,150 +46,279 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
     missing       = d.get("missing_fields", [])
     missing_html  = (f'<div class="alert">⚠️ שדות חסרים — יש לברר בשיחה: <strong>{", ".join(missing)}</strong></div>'
                      if missing else "")
+    script_html   = _md_to_html(onboarding_script)
+    now           = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    card_html   = _md_to_html(client_card)
-    script_html = _md_to_html(onboarding_script)
-    now         = datetime.now().strftime("%d/%m/%Y %H:%M")
+    crm_data = json.dumps({
+        "record_id": record_id,
+        "status": "onboarding_email_sent",
+        "created_at": now,
+        "business_name": d.get('business_name'),
+        "owner": d.get('owner_name'),
+        "phone": d.get('phone'),
+        "email": d.get('email'),
+        "city": d.get('city'),
+        "services": d.get('services'),
+        "brands_handled": d.get('brands_handled'),
+        "service_areas": d.get('service_areas'),
+    }, ensure_ascii=False, indent=2)
 
     return f"""<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>תוצאות אונבורדינג – {d.get('business_name','')}</title>
+  <title>דוח אונבורדינג – {d.get('business_name','')}</title>
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f8; color: #222; }}
+    body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #f4f5f7; color: #222; }}
 
-    /* TOP BAR */
-    .topbar {{ background: #1a1a2e; color: white; padding: 14px 40px;
-               display: flex; justify-content: space-between; align-items: center; }}
-    .topbar .logo {{ font-size: 22px; font-weight: 800; color: #e63946; }}
-    .topbar .meta {{ font-size: 13px; color: #aaa; }}
-    .badge {{ background: #e63946; color: white; font-size: 12px; font-weight: 700;
-              padding: 4px 12px; border-radius: 20px; margin-right: 10px; }}
-    .badge.success {{ background: #2ecc71; }}
+    /* HEADER */
+    .header {{
+      background: #1a1a2e;
+      color: white;
+      padding: 18px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #e63946;
+    }}
+    .header-left {{ display: flex; align-items: center; gap: 16px; }}
+    .logo {{ font-size: 20px; font-weight: 800; color: #e63946; letter-spacing: -0.5px; }}
+    .divider {{ color: #444; font-size: 20px; }}
+    .page-title {{ font-size: 16px; font-weight: 600; color: #ddd; }}
+    .header-right {{ font-size: 12px; color: #888; text-align: left; line-height: 1.8; }}
+    .header-right strong {{ color: #ccc; }}
 
-    /* LAYOUT */
-    .container {{ max-width: 1100px; margin: 30px auto; padding: 0 20px; }}
-    .grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }}
-    .full {{ grid-column: 1 / -1; }}
+    /* TABS */
+    .tabs-bar {{
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 0 48px;
+      display: flex;
+      gap: 0;
+    }}
+    .tab {{
+      padding: 16px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      user-select: none;
+    }}
+    .tab:hover {{ color: #1a1a2e; }}
+    .tab.active {{ color: #e63946; border-bottom-color: #e63946; }}
 
-    /* CARDS */
-    .card {{ background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.08);
-             overflow: hidden; }}
-    .card-header {{ padding: 16px 24px; background: #1a1a2e; color: white;
-                    display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }}
-    .card-header .icon {{ font-size: 20px; }}
-    .card-body {{ padding: 24px; }}
+    /* CONTENT */
+    .tab-content {{ display: none; padding: 40px 48px; max-width: 860px; margin: 0 auto; }}
+    .tab-content.active {{ display: block; }}
 
-    /* SUMMARY ROW */
-    .summary {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }}
-    .stat-box {{ background: white; border-radius: 12px; padding: 20px; text-align: center;
-                 box-shadow: 0 2px 10px rgba(0,0,0,.07); }}
-    .stat-box .num {{ font-size: 28px; font-weight: 800; color: #e63946; }}
-    .stat-box .lbl {{ font-size: 13px; color: #888; margin-top: 4px; }}
+    /* CLIENT CARD */
+    .section-title {{
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #999;
+      margin: 28px 0 10px;
+    }}
+    .section-title:first-child {{ margin-top: 0; }}
+    .field-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
+    .field {{
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      border: 1px solid #e8e8e8;
+    }}
+    .field .lbl {{ font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }}
+    .field .val {{ font-size: 15px; font-weight: 600; color: #1a1a2e; }}
+    .tags {{ display: flex; flex-wrap: wrap; gap: 8px; }}
+    .tag {{
+      background: #f0f2f8;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: #444;
+      border: 1px solid #e0e2ea;
+    }}
+    .tag.brand {{ background: #eef4ff; color: #1d4ed8; border-color: #bfdbfe; }}
+    .tag.area  {{ background: #f0fdf4; color: #166534; border-color: #bbf7d0; }}
 
-    /* DATA ROWS */
-    .row {{ display: flex; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }}
-    .row:last-child {{ border-bottom: none; }}
-    .row .lbl {{ color: #888; min-width: 120px; }}
-    .row .val {{ font-weight: 600; color: #222; }}
-
-    /* TAGS */
-    .tags {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }}
-    .tag {{ background: #f0f2f8; border-radius: 6px; padding: 4px 12px; font-size: 13px; }}
-    .tag.brand {{ background: #e8f4fd; color: #1565c0; }}
-    .tag.area  {{ background: #e8f5e9; color: #2e7d32; }}
-
-    /* MARKDOWN CONTENT */
-    .md-content h2 {{ font-size: 18px; color: #1a1a2e; margin: 20px 0 8px;
-                      border-right: 3px solid #e63946; padding-right: 10px; }}
-    .md-content h3 {{ font-size: 15px; color: #333; margin: 16px 0 6px; }}
-    .md-content p, .md-content li {{ font-size: 14px; line-height: 1.8; color: #444; }}
-    .md-content li {{ margin-right: 16px; list-style: disc; }}
-    .md-content hr {{ border: none; border-top: 1px solid #eee; margin: 16px 0; }}
-    .producer-note {{ display: block; background: #fff8e1; border-right: 3px solid #ffc107;
-                      padding: 6px 12px; margin: 6px 0; font-size: 13px; color: #7a5c00; border-radius: 4px; }}
+    /* STATUS BADGE */
+    .status-badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 24px;
+    }}
 
     /* ALERT */
-    .alert {{ background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;
-              padding: 12px 16px; margin-bottom: 16px; font-size: 14px; color: #856404; }}
+    .alert {{
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      margin-bottom: 20px;
+    }}
 
-    /* CRM */
-    .crm-record {{ background: #1e1e2e; color: #cdd6f4; border-radius: 10px;
-                   padding: 20px; font-family: monospace; font-size: 13px;
-                   line-height: 1.7; white-space: pre-wrap; }}
+    /* SCRIPT */
+    .md-content h3 {{
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin: 24px 0 8px;
+      padding-right: 12px;
+      border-right: 3px solid #e63946;
+    }}
+    .md-content p, .md-content li {{
+      font-size: 14px;
+      line-height: 1.9;
+      color: #444;
+    }}
+    .md-content li {{ margin-right: 20px; list-style: disc; margin-bottom: 4px; }}
+    .md-content hr {{ border: none; border-top: 1px solid #eee; margin: 20px 0; }}
+    .producer-note {{
+      display: block;
+      background: #fffbeb;
+      border-right: 3px solid #f59e0b;
+      padding: 7px 12px;
+      margin: 8px 0;
+      font-size: 13px;
+      color: #78350f;
+      border-radius: 0 6px 6px 0;
+    }}
 
     /* EMAIL */
-    .email-box {{ background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 10px; padding: 20px; }}
-    .email-meta {{ font-size: 13px; color: #666; border-bottom: 1px solid #ddd;
-                   padding-bottom: 12px; margin-bottom: 14px; }}
-    .email-meta span {{ font-weight: 700; color: #333; }}
-    .email-body {{ font-size: 14px; line-height: 1.9; white-space: pre-wrap; }}
+    .email-wrapper {{
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+    }}
+    .email-meta {{
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 16px 24px;
+    }}
+    .email-meta-row {{ display: flex; gap: 12px; font-size: 13px; margin-bottom: 6px; }}
+    .email-meta-row:last-child {{ margin-bottom: 0; }}
+    .email-meta-row .lbl {{ color: #888; min-width: 50px; }}
+    .email-meta-row .val {{ font-weight: 600; color: #222; }}
+    .email-body {{ padding: 28px 24px; font-size: 14px; line-height: 2; color: #333; white-space: pre-wrap; }}
+    .sent-badge {{
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;
+      border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600;
+      margin-right: 12px;
+    }}
+
+    /* CRM */
+    .crm-box {{
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 28px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      direction: ltr;
+      text-align: left;
+    }}
   </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="logo">❄ zap group <span class="badge success">✓ אונבורדינג הושלם</span></div>
-  <div class="meta">רשומת CRM: <strong>{record_id}</strong> &nbsp;|&nbsp; {now}</div>
+<div class="header">
+  <div class="header-left">
+    <span class="logo">zap group</span>
+    <span class="divider">|</span>
+    <span class="page-title">דוח אונבורדינג לקוח — {d.get('business_name','')}</span>
+  </div>
+  <div class="header-right">
+    <div>רשומת CRM: <strong>{record_id}</strong></div>
+    <div>תאריך: <strong>{now}</strong></div>
+  </div>
 </div>
 
-<div class="container">
+<div class="tabs-bar">
+  <div class="tab active" onclick="showTab('card')">👤 כרטיס לקוח</div>
+  <div class="tab" onclick="showTab('script')">📞 תסריט אונבורדינג</div>
+  <div class="tab" onclick="showTab('email')">📧 אימייל ללקוח</div>
+  <div class="tab" onclick="showTab('crm')">🗃️ רשומת CRM</div>
+</div>
 
-  <!-- SUMMARY STATS -->
-  <div class="summary">
-    <div class="stat-box"><div class="num">{d.get('years_in_business','?')}</div><div class="lbl">שנות ניסיון</div></div>
-    <div class="stat-box"><div class="num">{len(d.get('services',[]))}</div><div class="lbl">שירותים זוהו</div></div>
-    <div class="stat-box"><div class="num">{len(d.get('brands_handled',[]))}</div><div class="lbl">מותגים</div></div>
-    <div class="stat-box"><div class="num">{len(d.get('service_areas',[]))}</div><div class="lbl">אזורי פעילות</div></div>
+<!-- TAB: CLIENT CARD -->
+<div id="tab-card" class="tab-content active">
+  {missing_html}
+  <div class="section-title">פרטי עסק ובעלים</div>
+  <div class="field-grid">
+    <div class="field"><div class="lbl">שם העסק</div><div class="val">{d.get('business_name','—')}</div></div>
+    <div class="field"><div class="lbl">בעלים</div><div class="val">{d.get('owner_name','—')}</div></div>
+    <div class="field"><div class="lbl">סוג עסק</div><div class="val">{d.get('business_type','—')}</div></div>
+    <div class="field"><div class="lbl">ניסיון</div><div class="val">{d.get('years_in_business','—')} שנים</div></div>
   </div>
 
-  <div class="grid">
+  <div class="section-title">פרטי קשר</div>
+  <div class="field-grid">
+    <div class="field"><div class="lbl">טלפון</div><div class="val">{d.get('phone','—')}</div></div>
+    <div class="field"><div class="lbl">טלפון נוסף</div><div class="val">{d.get('secondary_phone','—') or '—'}</div></div>
+    <div class="field"><div class="lbl">אימייל</div><div class="val">{d.get('email','—')}</div></div>
+    <div class="field"><div class="lbl">כתובת</div><div class="val">{d.get('address','—')}</div></div>
+    <div class="field"><div class="lbl">שעות פעילות</div><div class="val">{d.get('working_hours','—') or '—'}</div></div>
+    <div class="field"><div class="lbl">וואטסאפ</div><div class="val">{d.get('social_media',{}).get('whatsapp','—') or '—'}</div></div>
+  </div>
 
-    <!-- CLIENT CARD -->
-    <div class="card">
-      <div class="card-header"><span class="icon">👤</span> כרטיס לקוח</div>
-      <div class="card-body">
-        {missing_html}
-        <div class="row"><span class="lbl">שם העסק</span><span class="val">{d.get('business_name','')}</span></div>
-        <div class="row"><span class="lbl">בעלים</span><span class="val">{d.get('owner_name','')}</span></div>
-        <div class="row"><span class="lbl">סוג עסק</span><span class="val">{d.get('business_type','')}</span></div>
-        <div class="row"><span class="lbl">טלפון</span><span class="val">{d.get('phone','')}</span></div>
-        <div class="row"><span class="lbl">טלפון נוסף</span><span class="val">{d.get('secondary_phone','') or '—'}</span></div>
-        <div class="row"><span class="lbl">אימייל</span><span class="val">{d.get('email','')}</span></div>
-        <div class="row"><span class="lbl">כתובת</span><span class="val">{d.get('address','')}</span></div>
-        <div class="row"><span class="lbl">שעות פעילות</span><span class="val">{d.get('working_hours','') or '—'}</span></div>
-        <div class="row"><span class="lbl">אתר</span><span class="val">{d.get('website_url','')}</span></div>
-        <div class="row"><span class="lbl">דפי זהב</span><span class="val">{d.get('dapei_zahav_url','')}</span></div>
-        <br>
-        <strong style="font-size:13px;color:#888;">שירותים</strong>
-        <div class="tags">{services_tags}</div>
-        <br>
-        <strong style="font-size:13px;color:#888;">מותגים</strong>
-        <div class="tags">{brands_tags}</div>
-        <br>
-        <strong style="font-size:13px;color:#888;">אזורי פעילות</strong>
-        <div class="tags">{areas_tags}</div>
+  <div class="section-title">נכסים דיגיטליים</div>
+  <div class="field-grid">
+    <div class="field"><div class="lbl">אתר אינטרנט</div><div class="val">{d.get('website_url','—')}</div></div>
+    <div class="field"><div class="lbl">דפי זהב</div><div class="val">{d.get('dapei_zahav_url','—')}</div></div>
+    <div class="field"><div class="lbl">פייסבוק</div><div class="val">{d.get('social_media',{}).get('facebook','—') or '—'}</div></div>
+    <div class="field"><div class="lbl">אינסטגרם</div><div class="val">{d.get('social_media',{}).get('instagram','—') or '—'}</div></div>
+  </div>
+
+  <div class="section-title">שירותים</div>
+  <div class="tags">{services_tags}</div>
+
+  <div class="section-title">מותגים</div>
+  <div class="tags">{brands_tags}</div>
+
+  <div class="section-title">אזורי פעילות</div>
+  <div class="tags">{areas_tags}</div>
+
+  <div class="status-badge">✓ לקוח חדש | ממתין לאונבורדינג</div>
+</div>
+
+<!-- TAB: ONBOARDING SCRIPT -->
+<div id="tab-script" class="tab-content">
+  <div class="md-content">{script_html}</div>
+</div>
+
+<!-- TAB: EMAIL -->
+<div id="tab-email" class="tab-content">
+  <div class="email-wrapper">
+    <div class="email-meta">
+      <div class="email-meta-row">
+        <span class="lbl">אל</span>
+        <span class="val">{d.get('email','')}</span>
+        <span class="sent-badge">✓ נשלח</span>
+      </div>
+      <div class="email-meta-row">
+        <span class="lbl">נושא</span>
+        <span class="val">ברוכים הבאים לזאפ! הכל מוכן לתחילת הקמת {d.get('business_name','')} 🚀</span>
       </div>
     </div>
-
-    <!-- ONBOARDING SCRIPT -->
-    <div class="card">
-      <div class="card-header"><span class="icon">📞</span> תסריט שיחת אונבורדינג</div>
-      <div class="card-body md-content">{script_html}</div>
-    </div>
-
-    <!-- EMAIL -->
-    <div class="card">
-      <div class="card-header"><span class="icon">📧</span> אימייל ללקוח</div>
-      <div class="card-body">
-        <div class="email-box">
-          <div class="email-meta">
-            <div><span>אל: </span>{d.get('email','')}</div>
-            <div><span>נושא: </span>ברוכים הבאים לזאפ! הכל מוכן לתחילת הקמת {d.get('business_name','')} 🚀</div>
-          </div>
-          <div class="email-body">שלום {d.get('owner_name', d.get('business_name',''))},
+    <div class="email-body">שלום {d.get('owner_name', d.get('business_name',''))},
 
 ברוכים הבאים למשפחת זאפ! אנחנו שמחים שבחרתם בנו לניהול הנוכחות הדיגיטלית של {d.get('business_name','')}.
 
@@ -205,20 +333,22 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
 
 בברכה,
 צוות זאפ גרופ</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CRM RECORD -->
-    <div class="card">
-      <div class="card-header"><span class="icon">🗃️</span> רשומת CRM</div>
-      <div class="card-body">
-        <div class="crm-record">{json.dumps({"record_id": record_id, "status": "onboarding_email_sent", "business_name": d.get('business_name'), "owner": d.get('owner_name'), "phone": d.get('phone'), "email": d.get('email'), "city": d.get('city'), "services": d.get('services'), "created_at": now}, ensure_ascii=False, indent=2)}</div>
-      </div>
-    </div>
-
   </div>
 </div>
+
+<!-- TAB: CRM -->
+<div id="tab-crm" class="tab-content">
+  <div class="crm-box">{crm_data}</div>
+</div>
+
+<script>
+  function showTab(name) {{
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }}
+</script>
 
 </body>
 </html>"""
