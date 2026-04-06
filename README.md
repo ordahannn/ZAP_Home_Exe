@@ -109,6 +109,23 @@ python main.py \
 
 ---
 
+## חיבור שליחת מייל אמיתית
+
+כרגע המערכת **מסמלצת** שליחת מייל — שומרת את תוכן האימייל לקובץ `output/email_*.txt`.
+לחיבור ספק מייל אמיתי, יש לעדכן את `simulate_send_email()` ב-`src/crm.py`.
+
+| ספק | חבילה | משתנה סביבה |
+|-----|-------|-------------|
+| **SendGrid** | `pip install sendgrid` | `SENDGRID_API_KEY` |
+| **SMTP** (Gmail / Outlook) | מובנה ב-Python | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` |
+| **Mailchimp Transactional** | `pip install mailchimp-transactional` | `MANDRILL_API_KEY` |
+
+דוגמאות קוד מלאות לכל אפשרות נמצאות בתוך הפונקציה עצמה (docstring של `simulate_send_email`).
+
+לחיבור CRM אמיתי (HubSpot / Salesforce) — יש להחליף את קריאות `_save_records()` ב-`crm.py` בקריאות REST API של ה-CRM הרלוונטי.
+
+---
+
 ## Results Viewer
 
 בסיום הריצה נפתח אוטומטית דף HTML בדפדפן המציג את כל הפלטים בצורה ויזואלית:

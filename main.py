@@ -13,7 +13,7 @@ Usage:
   python main.py --from-file scraped_content.txt
 
 Environment:
-  ANTHROPIC_API_KEY  – required
+  GROQ_API_KEY  – required
 """
 
 import argparse
@@ -118,7 +118,7 @@ def step_scrape(args) -> str:
 def step_extract(raw_content: str) -> dict:
     """Step 2: AI extraction of structured client data."""
     with Progress(SpinnerColumn(), TextColumn("{task.description}"), console=console) as p:
-        p.add_task("Extracting client data with Claude…", total=None)
+        p.add_task("Extracting client data with AI…", total=None)
         data = ai_processor.extract_client_data(raw_content)
 
     save_output("client_data.json", json.dumps(data, ensure_ascii=False, indent=2))

@@ -74,7 +74,61 @@ def log_email_sent(record_id: str, recipient: str, subject: str, body: str) -> N
 def simulate_send_email(recipient: str, subject: str, body: str) -> None:
     """
     Simulate sending an onboarding email.
-    In production: integrate with SendGrid / Mailchimp / internal SMTP.
+    Currently: saves the email to output/email_*.txt (no real sending).
+
+    To connect a real email provider in production, replace this function body
+    with one of the following integrations:
+
+    ── Option A: SendGrid ──────────────────────────────────────────────────────
+    pip install sendgrid
+    Set env var: SENDGRID_API_KEY
+
+        import sendgrid
+        from sendgrid.helpers.mail import Mail
+
+        sg = sendgrid.SendGridAPIClient(api_key=os.environ["SENDGRID_API_KEY"])
+        message = Mail(
+            from_email="onboarding@zapgroup.co.il",
+            to_emails=recipient,
+            subject=subject,
+            plain_text_content=body,
+        )
+        sg.send(message)
+
+    ── Option B: SMTP (Gmail / Outlook / corporate) ────────────────────────────
+    Set env vars: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
+
+        import smtplib
+        from email.mime.text import MIMEText
+
+        msg = MIMEText(body, "plain", "utf-8")
+        msg["Subject"] = subject
+        msg["From"] = os.environ["SMTP_USER"]
+        msg["To"] = recipient
+
+        with smtplib.SMTP_SSL(os.environ["SMTP_HOST"], int(os.environ["SMTP_PORT"])) as s:
+            s.login(os.environ["SMTP_USER"], os.environ["SMTP_PASSWORD"])
+            s.send_message(msg)
+
+    ── Option C: Mailchimp Transactional (Mandrill) ─────────────────────────────
+    pip install mailchimp-transactional
+    Set env var: MANDRILL_API_KEY
+
+        import mailchimp_transactional as MailchimpTransactional
+
+        client = MailchimpTransactional.Client(os.environ["MANDRILL_API_KEY"])
+        client.messages.send({"message": {
+            "from_email": "onboarding@zapgroup.co.il",
+            "to": [{"email": recipient}],
+            "subject": subject,
+            "text": body,
+        }})
+
+    ── CRM integration note ─────────────────────────────────────────────────────
+    The log_email_sent() function already records the outbound event.
+    In a real CRM (HubSpot / Salesforce), replace _save_records() calls with
+    the respective REST API calls to keep the timeline in sync.
+    ────────────────────────────────────────────────────────────────────────────
     """
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
