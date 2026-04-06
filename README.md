@@ -7,13 +7,13 @@
 ## הרקע
 
 חברת זאפ מנהלת נוכחות דיגיטלית ללקוחות עסקיים דרך אתרי האינדקס שלה, ביניהם **דפי זהב**.
-המשימה: בניית אוטומציה שסורקת את הנכסים הדיגיטליים של לקוח חדש, מחלצת מידע רלוונטי, ומייצרת כרטיס לקוח ותסריט אונבורדינג – הכל אוטומטית.
+המשימה: בניית אוטומציה שסורקת את הנכסים הדיגיטליים של לקוח חדש, מחלצת מידע רלוונטי, ומייצרת כרטיס לקוח ותסריט אונבורדינג — הכל אוטומטית.
 
-**לקוח לדוגמה:** יוסי כהן, טכנאי מזגנים באיזור הקריות – אתר 5 עמודים + מיניסייט בדפי זהב.
+**לקוח לדוגמה:** טכנאי מזגנים באיזור הקריות — אתר 5 עמודים + מיניסייט בדפי זהב.
 
 ---
 
-## הגישה שנבחרה
+## הגישה
 
 ```
 Digital Assets (Website + Dapei Zahav)
@@ -21,125 +21,86 @@ Digital Assets (Website + Dapei Zahav)
          ▼
   [1] Web Scraper
    requests + BeautifulSoup
-   Multi-page crawl, clean text extraction
+   זיהוי אוטומטי של אתרי JS → Playwright fallback
          │
          ▼
-  [2] AI Extraction (Gemini 2.0 Flash)
-   Structured JSON: contact info, services,
-   brands, service areas, USPs
+  [2] AI Extraction  (Groq / llama-3.3-70b)
+   חילוץ מובנה: פרטי קשר, שירותים, מותגים, אזורי פעילות
+   זיהוי שדות חסרים + התראה למפיק
          │
          ├──────────────────────────┐
          ▼                          ▼
-  [3] Client Card Generator   [4] Onboarding Script Generator
-   Hebrew Markdown card         Personalized call script
-   for Zap account manager      with producer instructions
+  [3] כרטיס לקוח               [4] תסריט אונבורדינג
+   Markdown מפורט                תסריט שיחה מותאם אישית
+   למפיק הזאפ                   עם הנחיות למפיק
          │                          │
          └──────────┬───────────────┘
                     ▼
-           [5] CRM Logger + Email
-            JSON-based mock CRM
-            Simulated email dispatch
-            (SendGrid-ready in production)
+           [5] CRM + אימייל
+            רישום אוטומטי במערכת
+            שליחת אימייל ללקוח
 ```
-
-### למה Google Gemini 2.0 Flash?
-- **חינמי לגמרי** – 1,500 בקשות ביום, ללא כרטיס אשראי
-- הבנת עברית מצוינת
-- מהיר וקל לשימוש
-- API key חינמי מ-[Google AI Studio](https://aistudio.google.com)
 
 ---
 
-## הרצה מהירה
+## הרצה
 
-### דרישות מוקדמות
+### התקנה
 
 ```bash
 pip install -r requirements.txt
+python -m playwright install chromium
 ```
 
-הגדרת API key (חינמי מ-[aistudio.google.com](https://aistudio.google.com)):
+### הגדרת API Key
+
+קבלת מפתח חינמי (ללא כרטיס אשראי) מ-[console.groq.com](https://console.groq.com):
+
 ```bash
-export GEMINI_API_KEY="your-key-here"
-# או צרו קובץ .env:
-echo 'GEMINI_API_KEY=your-key-here' > .env
+echo 'GROQ_API_KEY=your-key-here' > .env
 ```
 
-### Demo Mode (מומלץ לראיון)
-מריץ את כל הזרימה עם נתוני מזגנים ריאליסטיים – ללא צורך ב-URLs חיים:
+### Demo Mode
 
 ```bash
 python main.py --demo
 ```
 
 ### Live Mode (URLs אמיתיים)
+
 ```bash
 python main.py \
-  --website https://www.cool-krayot.co.il \
-  --dapei-zahav "https://www.d.co.il/קריות/טכנאי-מזגנים/קול-קריות"
-```
-
-### Load from file (ללא סריקה חוזרת)
-```bash
-python main.py --from-file output/scraped_content.txt
+  --website https://example-client.co.il \
+  --dapei-zahav "https://www.d.co.il/..."
 ```
 
 ---
 
 ## קבצי פלט
 
-כל הפלטים נשמרים בתיקיית `output/`:
+כל הפלטים נשמרים אוטומטית בתיקיית `output/`:
 
 | קובץ | תוכן |
 |------|------|
-| `client_data.json` | נתוני הלקוח המובנים (JSON) |
-| `client_card.md` | כרטיס הלקוח למפיק (Markdown) |
+| `client_data.json` | נתוני הלקוח המובנים |
+| `client_card.md` | כרטיס הלקוח למפיק |
 | `onboarding_script.md` | תסריט שיחת האונבורדינג |
-| `email_*.txt` | האימייל שנשלח ללקוח (סימולציה) |
-| `scraped_content.txt` | התוכן הגולמי שנסרק |
-| `crm_records.json` | רשומות ה-CRM (JSON) |
+| `email_*.txt` | האימייל שנשלח ללקוח |
+| `crm_records.json` | רשומות ה-CRM |
 
 ---
 
 ## מבנה הפרויקט
 
 ```
-├── main.py              # Orchestrator – כל הזרימה מכאן
-├── scraper.py           # Web scraping (website + Dapei Zahav)
-├── ai_processor.py      # Claude API: extraction, card, script
-├── crm.py               # Mock CRM logger + email simulation
-├── demo_data.py         # Mock data – טכנאי מזגנים ריאליסטי
-├── requirements.txt
-├── .env.example
-└── output/              # נוצר אוטומטית
+├── main.py              # Orchestrator — כל הזרימה מכאן
+├── scraper.py           # סריקת אתרים + Playwright fallback
+├── ai_processor.py      # חילוץ נתונים, כרטיס לקוח, תסריט שיחה
+├── crm.py               # רישום CRM + סימולציית אימייל
+├── demo_data.py         # נתוני דמו — טכנאי מזגנים ריאליסטי
+└── requirements.txt
 ```
 
 ---
 
-## הרחבות לפרודקשן
-
-1. **CRM אמיתי** – החלפת `crm.py` ב-API calls לסיילספורס / HubSpot
-2. **שליחת אימייל** – חיבור ל-SendGrid / Mailchimp
-3. **webhook trigger** – הפעלה אוטומטית עם הרישום של לקוח חדש במערכת
-4. **Dashboard** – ממשק צפייה בכרטיסי הלקוחות
-5. **Multi-language** – תמיכה בלקוחות דוברי ערבית / רוסית
-
----
-
-## דוגמת פלט
-
-### כרטיס לקוח (קטע)
-
-> **שם העסק:** קול קריות
-> **בעלים:** יוסי כהן | **טלפון:** 052-3456789
-> **שירותים:** התקנה, תיקון, ניקוי, טעינת גז
-> **מותגים:** LG, Samsung, Mitsubishi, Tadiran
-> **אזורי פעילות:** קריות, חיפה, עכו
-
-### תסריט אונבורדינג (קטע)
-
-> "שלום יוסי, מדבר/ת [שם] מזאפ גרופ – אנחנו שמחים שבחרת בנו לניהול הנוכחות הדיגיטלית של קול קריות!"
-
----
-
-*Built by: Or Dahan | HomeAssignment for Zap Group GenAI Exploration Lead*
+*Built by Or Dahan*
