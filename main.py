@@ -22,6 +22,8 @@ import os
 import sys
 from datetime import datetime
 
+import results_viewer
+
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.markdown import Markdown
@@ -221,6 +223,10 @@ def main():
     console.print(f"    • email_*.txt")
     console.print(f"    • scraped_content.txt")
     console.print(f"  CRM DB        : [dim]crm_records.json[/dim]")
+
+    # Open results viewer in browser
+    console.print(f"\n[bold green]Opening results viewer in browser...[/bold green]")
+    results_viewer.generate_and_open(client_data, client_card, onboarding_script, record_id)
 
 
 if __name__ == "__main__":
