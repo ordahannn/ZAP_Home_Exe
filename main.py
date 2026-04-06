@@ -22,6 +22,10 @@ import os
 import sys
 from datetime import datetime
 
+# Add src/ and data/ to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "data"))
+
 import results_viewer
 
 from dotenv import load_dotenv

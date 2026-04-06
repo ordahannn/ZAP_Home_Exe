@@ -93,12 +93,18 @@ python main.py \
 ## מבנה הפרויקט
 
 ```
-├── main.py              # Orchestrator — כל הזרימה מכאן
-├── scraper.py           # סריקת אתרים + Playwright fallback
-├── ai_processor.py      # חילוץ נתונים, כרטיס לקוח, תסריט שיחה
-├── crm.py               # רישום CRM + סימולציית אימייל
-├── demo_data.py         # נתוני דמו — טכנאי מזגנים ריאליסטי
-└── requirements.txt
+├── main.py                      # Orchestrator — כל הזרימה מכאן
+├── requirements.txt
+├── src/
+│   ├── scraper.py               # סריקת אתרים + Playwright fallback
+│   ├── ai_processor.py          # חילוץ נתונים, כרטיס לקוח, תסריט שיחה
+│   ├── crm.py                   # רישום CRM + סימולציית אימייל
+│   └── results_viewer.py        # דף תוצאות HTML (נפתח אוטומטית)
+├── data/
+│   └── demo_data.py             # נתוני דמו — טכנאי מזגנים ריאליסטי
+├── tools/
+│   └── generate_screenshots.py  # יצירת צילומי מסך לREADME
+└── screenshots/                 # צילומי מסך לתיעוד
 ```
 
 ---
@@ -115,16 +121,16 @@ python main.py \
 ## דוגמת פלט
 
 ### כרטיס לקוח
-
-![Client Card](screenshots/screenshot_client_card.png)
+![Client Card](screenshots/screenshot_tab_card.png)
 
 ### תסריט שיחת אונבורדינג
-
-![Onboarding Script](screenshots/screenshot_onboarding_script.png)
+![Onboarding Script](screenshots/screenshot_tab_script.png)
 
 ### אימייל אוטומטי ללקוח
+![Email](screenshots/screenshot_tab_email.png)
 
-![Email](screenshots/screenshot_email.png)
+### רשומת CRM
+![CRM](screenshots/screenshot_tab_crm.png)
 
 ---
 
