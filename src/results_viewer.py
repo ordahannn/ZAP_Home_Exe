@@ -379,7 +379,7 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
   </div>
   <div class="topbar-right">
     <span class="crm-id">{record_id}</span>
-    <span class="status-pill"><span class="dot"></span>אונבורדינג הושלם</span>
+    <span class="status-pill"><span class="dot"></span>הכנות הושלמו | ממתין לשיחה</span>
   </div>
 </div>
 
