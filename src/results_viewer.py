@@ -405,7 +405,7 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
 
   <div class="section-label">פרטי קשר</div>
   <div class="field-grid">
-    <div class="field"><div class="lbl">טלפון</div><div class="val">{d.get('phone','—')}</div></div>
+    <div class="field"><div class="lbl">טלפון</div><div class="val">{d.get('phone') or '—'}</div></div>
     <div class="field"><div class="lbl">טלפון נוסף</div><div class="val">{d.get('secondary_phone') or '—'}</div></div>
     <div class="field"><div class="lbl">אימייל</div><div class="val">{d.get('email','—')}</div></div>
     <div class="field"><div class="lbl">כתובת</div><div class="val">{d.get('address','—')}</div></div>
