@@ -146,65 +146,47 @@ def step_generate_script(client_data: dict) -> str:
 
 def preview_email_popup(recipient: str, subject: str, body: str):
     """
-    Open a tkinter popup to preview and edit the email before sending.
-    Returns (subject, body, should_send) — should_send=False if user cancelled.
+    Show email preview in terminal and let user edit/confirm before sending.
+    Returns (subject, body, should_send).
     """
-    import tkinter as tk
-    from tkinter import scrolledtext
+    console.print()
+    console.print(Panel(
+        f"[dim]אל:[/dim] {recipient}\n"
+        f"[dim]נושא:[/dim] {subject}\n\n"
+        f"{body}",
+        title="[bold]תצוגה מקדימה של האימייל[/bold]",
+        border_style="blue",
+        expand=False
+    ))
+    console.print()
 
-    result = {"subject": subject, "body": body, "send": False}
+    choice = console.input("[bold]שלח את האימייל? \\[כן/לא/ערוך][/bold]: ").strip().lower()
 
-    root = tk.Tk()
-    root.title("תצוגה מקדימה של האימייל")
-    root.geometry("620x520")
-    root.configure(bg="#1a1d27")
-    root.resizable(True, True)
+    if choice in ("לא", "n", "no"):
+        return subject, body, False
 
-    # Header
-    header = tk.Label(root, text=f"אל: {recipient}", bg="#1a1d27", fg="#7b82a0",
-                      font=("Helvetica", 11), anchor="e")
-    header.pack(fill="x", padx=20, pady=(16, 4))
+    if choice in ("ערוך", "e", "edit"):
+        console.print(f"\n[dim]נושא נוכחי:[/dim] {subject}")
+        new_subject = console.input("[bold]נושא חדש (Enter לשמור):[/bold]: ").strip()
+        if new_subject:
+            subject = new_subject
 
-    # Subject
-    tk.Label(root, text="נושא:", bg="#1a1d27", fg="#e8eaf0",
-             font=("Helvetica", 11, "bold"), anchor="e").pack(fill="x", padx=20)
-    subject_var = tk.StringVar(value=subject)
-    subject_entry = tk.Entry(root, textvariable=subject_var, bg="#22263a", fg="#e8eaf0",
-                             insertbackground="white", font=("Helvetica", 11),
-                             relief="flat", bd=8)
-    subject_entry.pack(fill="x", padx=20, pady=(4, 12))
+        console.print(f"\n[dim]תוכן נוכחי:[/dim]\n{body}\n")
+        console.print("[dim]הכנס תוכן חדש (שורה ריקה כפולה לסיום):[/dim]")
+        lines = []
+        empty_count = 0
+        while empty_count < 2:
+            line = input()
+            if line == "":
+                empty_count += 1
+            else:
+                empty_count = 0
+            lines.append(line)
+        new_body = "\n".join(lines).rstrip()
+        if new_body:
+            body = new_body
 
-    # Body
-    tk.Label(root, text="תוכן:", bg="#1a1d27", fg="#e8eaf0",
-             font=("Helvetica", 11, "bold"), anchor="e").pack(fill="x", padx=20)
-    body_text = scrolledtext.ScrolledText(root, bg="#22263a", fg="#e8eaf0",
-                                          insertbackground="white", font=("Helvetica", 11),
-                                          relief="flat", bd=8, wrap="word")
-    body_text.insert("1.0", body)
-    body_text.pack(fill="both", expand=True, padx=20, pady=(4, 12))
-
-    # Buttons
-    btn_frame = tk.Frame(root, bg="#1a1d27")
-    btn_frame.pack(fill="x", padx=20, pady=(0, 16))
-
-    def on_send():
-        result["subject"] = subject_var.get()
-        result["body"] = body_text.get("1.0", "end-1c")
-        result["send"] = True
-        root.destroy()
-
-    def on_cancel():
-        root.destroy()
-
-    tk.Button(btn_frame, text="שלח", command=on_send, bg="#e63946", fg="white",
-              font=("Helvetica", 12, "bold"), relief="flat", padx=24, pady=8,
-              cursor="hand2").pack(side="right")
-    tk.Button(btn_frame, text="בטל", command=on_cancel, bg="#2e3347", fg="#e8eaf0",
-              font=("Helvetica", 12), relief="flat", padx=24, pady=8,
-              cursor="hand2").pack(side="right", padx=(0, 10))
-
-    root.mainloop()
-    return result["subject"], result["body"], result["send"]
+    return subject, body, True
 
 
 def step_crm_and_email(client_data: dict, card: str, script: str, demo: bool = False) -> str:
