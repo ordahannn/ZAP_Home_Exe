@@ -23,6 +23,7 @@ def _md_to_html(text: str) -> str:
     out = []
     for line in lines:
         line = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
+        line = re.sub(r'\[❗חובה לברר\]', r'<strong style="color:var(--accent)">❗חובה לברר</strong>', line)
         line = re.sub(r'\[הנחיות למפיק:?\s*([^\]]+)\]',
                       r'<span class="producer-note">📋 \1</span>', line)
         if line.startswith("## "):
