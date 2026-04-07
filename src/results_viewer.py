@@ -21,21 +21,43 @@ def _md_to_html(text: str) -> str:
     import re
     lines = text.splitlines()
     out = []
+    in_list = False
     for line in lines:
         line = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
         line = re.sub(r'\[❗חובה לברר\]', r'<strong style="color:var(--accent)">❗חובה לברר</strong>', line)
-        line = re.sub(r'\[הנחיות למפיק:?\s*([^\]]+)\]',
+        line = re.sub(r'\[(?:הנחיות למפיק:?\s*)?([^\]]{4,})\]',
                       r'<span class="producer-note">📋 \1</span>', line)
         if line.startswith("## "):
+            if in_list:
+                out.append('</ul>')
+                in_list = False
             out.append(f'<h3>{line[3:]}</h3>')
         elif line.startswith("# "):
+            if in_list:
+                out.append('</ul>')
+                in_list = False
             out.append(f'<h2>{line[2:]}</h2>')
         elif line.startswith("- ") or line.startswith("* "):
+            if not in_list:
+                out.append('<ul>')
+                in_list = True
             out.append(f'<li>{line[2:]}</li>')
         elif line.strip() == "---":
+            if in_list:
+                out.append('</ul>')
+                in_list = False
             out.append('<hr>')
         elif line.strip():
+            if in_list:
+                out.append('</ul>')
+                in_list = False
             out.append(f'<p>{line}</p>')
+        else:
+            if in_list:
+                out.append('</ul>')
+                in_list = False
+    if in_list:
+        out.append('</ul>')
     return "\n".join(out)
 
 
