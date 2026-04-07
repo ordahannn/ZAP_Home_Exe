@@ -127,8 +127,4 @@ python main.py --website https://example-client.co.il --dapei-zahav "https://www
 ### רשומת CRM
 ![CRM](screenshots/screenshot_tab_crm.png)
 
----
-
-*אור דהן*
-
 </div>
