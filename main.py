@@ -145,12 +145,13 @@ def step_generate_script(client_data: dict) -> str:
     return script
 
 
-def step_crm_and_email(client_data: dict, card: str, script: str) -> str:
+def step_crm_and_email(client_data: dict, card: str, script: str, demo: bool = False) -> str:
     """Step 5: Log to CRM and simulate sending onboarding email."""
     record_id = crm.log_onboarding(client_data, card, script)
 
     subject, body = build_onboarding_email(client_data, script)
-    email_recipient = client_data.get("email") or "client@example.com"
+    # In demo mode, send to the demo address so it can actually be received
+    email_recipient = "ordahanpython@gmail.com" if demo else (client_data.get("email") or "client@example.com")
 
     crm.simulate_send_email(email_recipient, subject, body)
     crm.log_email_sent(record_id, email_recipient, subject, body)
@@ -205,7 +206,7 @@ def main():
 
     # --- Step 5: CRM + Email ---
     console.print("[bold]Step 5:[/bold] Logging to CRM & sending onboarding email…")
-    record_id = step_crm_and_email(client_data, client_card, onboarding_script)
+    record_id = step_crm_and_email(client_data, client_card, onboarding_script, demo=args.demo)
     console.print(f"  [green]✓[/green] CRM record created: [bold]{record_id}[/bold]\n")
 
     # --- Display results ---
