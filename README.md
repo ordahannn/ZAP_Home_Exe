@@ -1,6 +1,8 @@
-# Zap Group – AI Onboarding Automation
+<div dir="rtl">
 
-פתרון שבניתי למשימת הבית של זאפ גרופ — אוטומציה שסורקת את הנכסים הדיגיטליים של לקוח חדש, שולפת ממנו מידע, ומייצרת ממנו כרטיס לקוח, תסריט שיחה, ורישום CRM — הכל אוטומטי.
+# אוטומציית אונבורדינג לקוחות – זאפ גרופ
+
+פתרון שבניתי למשימת הבית של זאפ גרופ — אוטומציה שסורקת את הנכסים הדיגיטליים של לקוח חדש, שולפת ממנו מידע, ומייצרת כרטיס לקוח, תסריט שיחה, ורישום CRM — הכל אוטומטי.
 
 **לקוח לדוגמה:** טכנאי מזגנים באזור הקריות — אתר 5 עמודים + מיניסייט בדפי זהב.
 
@@ -30,13 +32,13 @@ python -m playwright install chromium
 echo 'GROQ_API_KEY=your-key-here' > .env
 ```
 
-### Demo mode
+### מצב Demo
 
 ```bash
 python main.py --demo
 ```
 
-### Live mode
+### מצב Live
 
 ```bash
 python main.py --website https://example-client.co.il --dapei-zahav "https://www.d.co.il/..."
@@ -44,31 +46,31 @@ python main.py --website https://example-client.co.il --dapei-zahav "https://www
 
 ---
 
-## פלטים
+## קבצי פלט
 
-כל הקבצים נשמרים ב-`output/`:
+כל הקבצים נשמרים בתיקיית `output/`:
 
-| קובץ | תוכן |
+| תוכן | קובץ |
 |------|------|
-| `client_data.json` | נתוני הלקוח המובנים |
-| `client_card.md` | כרטיס הלקוח למפיק |
-| `onboarding_script.md` | תסריט שיחת האונבורדינג |
-| `email_*.txt` | האימייל שנשלח ללקוח |
+| נתוני הלקוח המובנים | `client_data.json` |
+| כרטיס הלקוח למפיק | `client_card.md` |
+| תסריט שיחת האונבורדינג | `onboarding_script.md` |
+| האימייל שנשלח ללקוח | `email_*.txt` |
 
 ---
 
 ## מגבלות ידועות
 
-- **Groq free tier** — מגביל 100k טוקנים ליום. אם נגמר המכסה, מחכים עד למחרת.
-- **דפי זהב** — חוסמת scrapers (403/429). ה-demo mode משתמש בנתוני mock ריאליסטיים.
-- **שליחת מייל** — עכשיו מסומלצת (נשמרת לקובץ). לחיבור אמיתי ראה הוראות ב-`src/crm.py`.
+- **Groq (חינמי)** — מגביל 100k טוקנים ליום. אם נגמרה המכסה, ממתינים עד למחרת
+- **דפי זהב** — חוסמת סורקים (403/429). מצב ה-Demo משתמש בנתוני mock ריאליסטיים
+- **שליחת מייל** — כרגע מסומלצת (נשמרת לקובץ). לחיבור אמיתי ראו הוראות ב-`src/crm.py`
 
 ---
 
 ## חיבור מייל אמיתי
 
-הפונקציה `simulate_send_email` ב-`src/crm.py` מכילה הוראות מפורטות לחיבור:
-- SendGrid (`pip install sendgrid`)
+הפונקציה `simulate_send_email` ב-`src/crm.py` מכילה הוראות מפורטות לחיבור עם:
+- SendGrid
 - SMTP רגיל (Gmail / Outlook)
 - Mailchimp Transactional
 
@@ -107,4 +109,6 @@ python main.py --website https://example-client.co.il --dapei-zahav "https://www
 
 ---
 
-*Or Dahan*
+*אור דהן*
+
+</div>
