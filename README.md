@@ -21,28 +21,44 @@
 
 ## התקנה והרצה
 
+<div dir="ltr">
+
 ```bash
 pip install -r requirements.txt
 python -m playwright install chromium
 ```
 
+</div>
+
 מפתח Groq חינמי (ללא כרטיס אשראי) מ-[console.groq.com](https://console.groq.com):
+
+<div dir="ltr">
 
 ```bash
 echo 'GROQ_API_KEY=your-key-here' > .env
 ```
 
+</div>
+
 ### מצב Demo
+
+<div dir="ltr">
 
 ```bash
 python main.py --demo
 ```
 
+</div>
+
 ### מצב Live
+
+<div dir="ltr">
 
 ```bash
 python main.py --website https://example-client.co.il --dapei-zahav "https://www.d.co.il/..."
 ```
+
+</div>
 
 ---
 
@@ -78,18 +94,22 @@ python main.py --website https://example-client.co.il --dapei-zahav "https://www
 
 ## מבנה הפרויקט
 
+<div dir="ltr">
+
 ```
-├── main.py                 # זרימת העבודה הראשית
+├── main.py                 # main pipeline orchestrator
 ├── requirements.txt
 ├── src/
-│   ├── scraper.py          # סריקת אתרים + Playwright fallback
-│   ├── ai_processor.py     # חילוץ נתונים + יצירת כרטיס ותסריט
-│   ├── crm.py              # רישום CRM + סימולציית אימייל
-│   └── results_viewer.py   # דף HTML לתצוגת תוצאות
+│   ├── scraper.py          # web scraper + Playwright fallback
+│   ├── ai_processor.py     # AI extraction, client card, script
+│   ├── crm.py              # CRM logging + email simulation
+│   └── results_viewer.py   # HTML results page
 ├── data/
-│   └── demo_data.py        # נתוני demo של טכנאי מזגנים
+│   └── demo_data.py        # realistic mock data for demo mode
 └── screenshots/
 ```
+
+</div>
 
 ---
 
