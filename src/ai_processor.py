@@ -135,6 +135,14 @@ def generate_onboarding_script(client_data: dict) -> str:
     services = ", ".join(client_data.get("services", []))
     region = client_data.get("region") or client_data.get("city", "הקריות")
 
+    missing = client_data.get("missing_fields", [])
+    missing_note = (
+        f"\n\n⚠️ שדות שלא נמצאו אוטומטית ויש לברר בשיחה: {', '.join(missing)}\n"
+        "חובה להכניס שאלה ספציפית לגבי כל שדה חסר בחלק 'שאלות לאיסוף מידע', "
+        "וסמן אותה ב-[❗חובה לברר] בתוך התסריט."
+        if missing else ""
+    )
+
     prompt = f"""אתה מומחה בחווית לקוח ואונבורדינג של חברת זאפ גרופ.
 צור תסריט שיחת אונבורדינג מותאם אישית ללקוח הבא:
 
@@ -142,7 +150,7 @@ def generate_onboarding_script(client_data: dict) -> str:
 שם הבעלים: {owner_name or "לא ידוע"}
 שירותים: {services or "טכנאי מזגנים"}
 אזור: {region}
-כל נתוני הלקוח: {json.dumps(client_data, ensure_ascii=False, indent=2)}
+כל נתוני הלקוח: {json.dumps(client_data, ensure_ascii=False, indent=2)}{missing_note}
 
 צור תסריט שיחה בעברית הכולל:
 

@@ -44,8 +44,23 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
     brands_tags   = "".join(f'<span class="tag tag-blue">{b}</span>' for b in d.get("brands_handled", []))
     areas_tags    = "".join(f'<span class="tag tag-green">{a}</span>' for a in d.get("service_areas", []))
     missing       = d.get("missing_fields", [])
-    missing_html  = (f'<div class="alert">⚠️ שדות חסרים — יש לברר בשיחה: <strong>{", ".join(missing)}</strong></div>'
+    _field_names  = {
+        "phone": "טלפון", "email": "אימייל", "business_name": "שם העסק",
+        "services": "שירותים", "working_hours": "שעות פעילות",
+        "address": "כתובת", "owner_name": "שם בעלים",
+    }
+    missing_heb   = [_field_names.get(f, f) for f in missing]
+    missing_html  = (f'<div class="alert">⚠️ שדות חסרים — יש לברר בשיחה: <strong>{", ".join(missing_heb)}</strong></div>'
                      if missing else "")
+    def _field(lbl, key, span=1):
+        val = d.get(key) or '—'
+        cls = "field missing" if key in missing else "field"
+        badge = ' <span style="font-size:10px;color:var(--accent)">← יש לברר</span>' if key in missing else ""
+        return f'<div class="{cls}"><div class="lbl">{lbl}{badge}</div><div class="val">{val}</div></div>'
+
+    script_note = ""
+    if missing:
+        script_note = f'<div class="alert" style="margin-bottom:20px">⚠️ יש להשלים בשיחה: <strong>{", ".join(missing_heb)}</strong> — השאלות הרלוונטיות מודגשות בתסריט</div>'
     script_html   = _md_to_html(onboarding_script)
     now           = datetime.now().strftime("%d/%m/%Y %H:%M")
     sm            = d.get("social_media") or {}
@@ -207,6 +222,12 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
       transition: border-color 0.15s;
     }}
     .field:hover {{ border-color: #3e4460; }}
+    .field.missing {{
+      border-color: rgba(230, 57, 70, 0.5);
+      background: rgba(230, 57, 70, 0.06);
+    }}
+    .field.missing .lbl {{ color: var(--accent); }}
+    .field.missing .val {{ color: #ff8a93; }}
     .field .lbl {{
       font-size: 10px;
       font-weight: 600;
@@ -397,19 +418,19 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
 
   <div class="section-label">פרטי עסק ובעלים</div>
   <div class="field-grid">
-    <div class="field"><div class="lbl">שם העסק</div><div class="val">{d.get('business_name','—')}</div></div>
-    <div class="field"><div class="lbl">בעלים</div><div class="val">{d.get('owner_name','—')}</div></div>
-    <div class="field"><div class="lbl">סוג עסק</div><div class="val">{d.get('business_type','—')}</div></div>
+    {_field('שם העסק', 'business_name')}
+    {_field('בעלים', 'owner_name')}
+    <div class="field"><div class="lbl">סוג עסק</div><div class="val">{d.get('business_type') or '—'}</div></div>
     <div class="field"><div class="lbl">ניסיון</div><div class="val">{d.get('years_in_business') or '—'}{' שנים' if d.get('years_in_business') else ''}</div></div>
   </div>
 
   <div class="section-label">פרטי קשר</div>
   <div class="field-grid">
-    <div class="field"><div class="lbl">טלפון</div><div class="val">{d.get('phone') or '—'}</div></div>
+    {_field('טלפון', 'phone')}
     <div class="field"><div class="lbl">טלפון נוסף</div><div class="val">{d.get('secondary_phone') or '—'}</div></div>
-    <div class="field"><div class="lbl">אימייל</div><div class="val">{d.get('email','—')}</div></div>
-    <div class="field"><div class="lbl">כתובת</div><div class="val">{d.get('address','—')}</div></div>
-    <div class="field"><div class="lbl">שעות פעילות</div><div class="val">{d.get('working_hours') or '—'}</div></div>
+    {_field('אימייל', 'email')}
+    {_field('כתובת', 'address')}
+    {_field('שעות פעילות', 'working_hours')}
     <div class="field"><div class="lbl">וואטסאפ</div><div class="val">{whatsapp}</div></div>
   </div>
 
@@ -435,6 +456,7 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
 
 <!-- TAB: SCRIPT -->
 <div id="tab-script" class="tab-content">
+  {script_note}
   <div class="md-content">{script_html}</div>
 </div>
 
