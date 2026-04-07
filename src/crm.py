@@ -142,7 +142,25 @@ def simulate_send_email(recipient: str, subject: str, body: str) -> None:
         f.write("-" * 60 + "\n")
         f.write(body)
 
-    print(f"  [CRM] Email simulated → saved to {filename}")
+    print(f"  [CRM] Email saved → {filename}")
+
+    # Send via Gmail SMTP if credentials are set in .env
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+    if smtp_user and smtp_password:
+        try:
+            import smtplib
+            from email.mime.text import MIMEText
+            msg = MIMEText(body, "plain", "utf-8")
+            msg["Subject"] = subject
+            msg["From"] = smtp_user
+            msg["To"] = recipient
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+                s.login(smtp_user, smtp_password)
+                s.send_message(msg)
+            print(f"  [CRM] Email sent via Gmail → {recipient}")
+        except Exception as e:
+            print(f"  [CRM] Gmail send failed: {e}")
 
 
 def get_record(record_id: str) -> dict:

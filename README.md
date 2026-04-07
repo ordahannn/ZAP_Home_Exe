@@ -52,10 +52,12 @@ python main.py --demo
 
 ### מצב Live
 
+מעבירים כל URL של נכס דיגיטלי — אתר, דפי זהב, פייסבוק, כל מה שיש:
+
 <div dir="ltr">
 
 ```bash
-python main.py --website https://example-client.co.il --dapei-zahav "https://www.d.co.il/..."
+python main.py --assets https://client-site.co.il "https://www.d.co.il/..." https://facebook.com/...
 ```
 
 </div>
@@ -83,12 +85,22 @@ python main.py --website https://example-client.co.il --dapei-zahav "https://www
 
 ---
 
-## חיבור מייל אמיתי
+## שליחת מייל אמיתי
 
-קובץ crm.py מכיל הוראות מפורטות לחיבור עם שלושה ספקים:
-- SendGrid
-- שרת דואר רגיל (ג'ימייל / אאוטלוק)
-- Mailchimp
+לפני השליחה נפתח חלון תצוגה מקדימה שמאפשר לערוך את הנושא והתוכן.
+
+לשליחה אמיתית דרך Gmail — יש להוסיף לקובץ `.env`:
+
+<div dir="ltr">
+
+```
+SMTP_USER=your-gmail@gmail.com
+SMTP_PASSWORD=xxxx-xxxx-xxxx-xxxx
+```
+
+</div>
+
+יש ליצור סיסמת אפליקציה ייעודית בכתובת: myaccount.google.com/apppasswords
 
 ---
 

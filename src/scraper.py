@@ -113,6 +113,17 @@ def _collect_internal_links(base_url: str, raw_html: str, max_links: int = 15) -
     return list(links)
 
 
+def scrape_url(url: str) -> str:
+    """
+    Scrape a single URL and return its clean text content.
+    Works for any digital asset: website homepage, Dapei Zahav listing,
+    Facebook page, Instagram profile, etc.
+    Auto-detects JS-rendered pages and uses Playwright if needed.
+    """
+    text, _ = _fetch_page(url)
+    return text
+
+
 def scrape_website(base_url: str, max_pages: int = 5) -> dict:
     """
     Crawl up to max_pages of a website starting from base_url.
