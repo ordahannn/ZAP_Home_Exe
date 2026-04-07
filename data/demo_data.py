@@ -16,7 +16,7 @@ MOCK_WEBSITE_CONTENT = {
 24 שנות ניסיון | שירות מהיר ואמין | כל המותגים
 
 צרו קשר עכשיו: 052-3456789
-info@cool-krayot.co.il
+ordahanpython@gmail.com
 
 מייסד: יוסי כהן - טכנאי מוסמך ומנוסה
 
@@ -70,7 +70,7 @@ info@cool-krayot.co.il
 טלפון: 052-3456789
 טלפון נוסף: 04-8765432
 וואטסאפ: 052-3456789
-אימייל: info@cool-krayot.co.il
+אימייל: ordahanpython@gmail.com
 כתובת: רחוב העצמאות 45, קריית ביאליק, 2700000
 
 לתיאום שירות ניתן ליצור קשר בכל ערוץ.
@@ -109,7 +109,7 @@ MOCK_DAPEI_ZAHAV_CONTENT = {
 
 פרטי התקשרות:
 טלפון: 052-3456789
-אימייל: info@cool-krayot.co.il
+אימייל: ordahanpython@gmail.com
 אתר אינטרנט: www.cool-krayot.co.il
 
 קטגוריות:
