@@ -132,8 +132,7 @@ def simulate_send_email(recipient: str, subject: str, body: str) -> None:
     """
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"{output_dir}/email_{timestamp}.txt"
+    filename = f"{output_dir}/email_latest.txt"
 
     with open(filename, "w", encoding="utf-8") as f:
         f.write(f"TO: {recipient}\n")

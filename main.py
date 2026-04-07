@@ -282,7 +282,7 @@ Examples:
     console.print(f"    • client_data.json")
     console.print(f"    • client_card.md")
     console.print(f"    • onboarding_script.md")
-    console.print(f"    • email_*.txt")
+    console.print(f"    • email_latest.txt")
     console.print(f"    • scraped_content.txt")
     console.print(f"  CRM DB        : [dim]crm_records.json[/dim]")
 

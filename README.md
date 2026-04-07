@@ -73,7 +73,7 @@ python main.py --assets https://client-site.co.il "https://www.d.co.il/..." http
 | נתוני הלקוח המובנים | `client_data.json` |
 | כרטיס הלקוח למפיק | `client_card.md` |
 | תסריט שיחת האונבורדינג | `onboarding_script.md` |
-| האימייל שנשלח ללקוח | `email_*.txt` |
+| האימייל שנשלח ללקוח | `email_latest.txt` |
 
 ---
 
