@@ -400,7 +400,7 @@ def _build_html(client_data: dict, client_card: str, onboarding_script: str, rec
     <div class="field"><div class="lbl">שם העסק</div><div class="val">{d.get('business_name','—')}</div></div>
     <div class="field"><div class="lbl">בעלים</div><div class="val">{d.get('owner_name','—')}</div></div>
     <div class="field"><div class="lbl">סוג עסק</div><div class="val">{d.get('business_type','—')}</div></div>
-    <div class="field"><div class="lbl">ניסיון</div><div class="val">{d.get('years_in_business','—')} שנים</div></div>
+    <div class="field"><div class="lbl">ניסיון</div><div class="val">{d.get('years_in_business') or '—'}{' שנים' if d.get('years_in_business') else ''}</div></div>
   </div>
 
   <div class="section-label">פרטי קשר</div>

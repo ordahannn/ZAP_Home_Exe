@@ -83,13 +83,13 @@ def _fetch_with_playwright(url: str) -> tuple[str, str]:
 
 def _fetch_page(url: str) -> tuple[str, str]:
     """
-    Smart fetch: tries requests first, falls back to Playwright if JS-rendered.
+    Smart fetch: tries requests first, falls back to Playwright if JS-rendered or on error.
     Returns (clean_text, raw_html).
     """
     text, html = _fetch_with_requests(url)
 
-    if _is_js_rendered(text):
-        print(f"  [scraper] JS-rendered detected at {url} — switching to Playwright")
+    if _is_js_rendered(text) or text.startswith("[Error"):
+        print(f"  [scraper] JS-rendered or request failed at {url} — switching to Playwright")
         text, html = _fetch_with_playwright(url)
 
     return text, html

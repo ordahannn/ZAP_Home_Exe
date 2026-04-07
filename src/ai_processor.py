@@ -76,7 +76,16 @@ Return ONLY a valid JSON object (no markdown, no explanation) with this exact st
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
-    data = json.loads(raw)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        # AI occasionally returns slightly malformed JSON — try to extract the object
+        import re
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+        else:
+            raise ValueError(f"AI returned non-JSON response: {raw[:200]}")
 
     # Flag missing critical fields so the account manager knows what to ask
     critical = ["phone", "email", "business_name", "services", "working_hours"]
